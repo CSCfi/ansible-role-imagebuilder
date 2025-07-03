@@ -1,7 +1,7 @@
 ---
 # defaults file for imagebuilder-role
 install_method: container
-imagebuilder_repository_url: https://github.com/CSCfi/imagebuilder/
+imagebuilder_repository_url: https://github.com/CSCfi/imagebuilder.git
 imagebuilder_directory: imagebuilder
 user_to_execute: imagebuilder
 container_name: imagebuilder
