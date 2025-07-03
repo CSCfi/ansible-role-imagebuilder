@@ -1,0 +1,92 @@
+---
+# tasks file for imagebuilder-role
+- name: Ensure required packages are installed
+  package:
+    name:
+      - git
+      - podman
+
+
+- name: Create imagebuilder user
+  user:
+    name: "{{ user_to_execute }}"
+    state: present
+    create_home: yes
+
+- name: Clone repository
+  git:
+    repo: "{{ imagebuilder_repository_url }}"
+    dest: "/home/{{ user_to_execute }}/{{ imagebuilder_directory }}"
+
+
+
+
+- name: Ensure .config exists for {{ user_to_execute }}
+  file:
+      path: "/home/{{ user_to_execute }}/.config"
+      state: directory
+      mode: 0755
+
+
+
+- name: Copy vaulted clouds.yaml
+  copy:
+    content: "{{ clouds_yaml | to_nice_yaml }}"
+    dest: "/home/{{ user_to_execute }}/.config/clouds.yaml"
+    mode: '0600'
+
+
+
+- name: Ensure {{ imagebuilder_extra_dir }} exists
+  file:
+      path: /home/{{ user_to_execute }}/{{ imagebuilder_extra_dir }}
+      state: directory
+
+
+
+- name: Copy input.json to remote
+  copy:
+    dest: /home/{{ user_to_execute }}/{{ imagebuilder_extra_dir }}/input.json
+    content: "{{ imagebuilder_image_data | to_nice_json }}"
+
+
+
+- name: ensure log file exists on remote
+  copy:
+    content: ""
+    dest: /home/{{ user_to_execute }}/{{imagebuilder_extra_dir}}/log.log
+    force: false
+
+
+- name: Build imagebuilder container
+  shell:
+    cmd: podman build --network host -t {{ container_name }} /home/{{ user_to_execute }}/{{ imagebuilder_directory }}
+
+
+- name: Deploy imagebuilder services
+  template:
+    src: imagebuilder_run.service.j2
+    dest: /etc/systemd/system/imagebuilder-{{ item.name }}.service
+    mode: 0600
+  loop: "{{ imagebuilder_clouds }}"
+
+
+- name: Deploy imagebuilder timers
+  template:
+    src: imagebuilder_run.timer.j2
+    dest: /etc/systemd/system/imagebuilder-{{ item.name }}.timer
+    mode: 0600
+  loop: "{{ imagebuilder_clouds }}"
+
+
+- name: Enable imagebuilder timers
+  systemd:
+    name: imagebuilder-{{ item.name }}.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+
+  loop: "{{ imagebuilder_clouds }}"
+    
+
+...

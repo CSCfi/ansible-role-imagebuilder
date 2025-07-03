@@ -1,0 +1,39 @@
+---
+# defaults file for imagebuilder-role
+install_method: container
+imagebuilder_repository_url: https://github.com/CSCfi/imagebuilder/
+imagebuilder_directory: imagebuilder
+user_to_execute: imagebuilder
+container_name: imagebuilder
+imagebuilder_extra_dir: imagebuilder-helpers
+
+
+imagebuilder_clouds:
+  - name: mycloud
+    imagebuilder_network: imagebuilder-network
+    imagebuilder_cloud: mycloud
+    timer_calendar: "*-*-* 12:00:00"
+
+
+imagebuilder_image_data:
+  current:
+    - checksum_url: https://cloud-images.ubuntu.com/noble/current/SHA256SUMS
+      image_name: Ubuntu-24.04
+      image_url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+      properties:
+        os_distro: ubuntu
+      visibility: public
+      
+    - checksum_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/CHECKSUM
+      image_name: AlmaLinux-9
+      image_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
+      properties:
+        os_distro: almalinux
+      visibility: public
+  
+  deprecated:
+    - filename: noble-server-cloudimg-amd64.img
+      image_name: Ubuntu-18.04
+
+
+...
