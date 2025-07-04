@@ -6,11 +6,11 @@ After=syslog.target network.target auditd.service
 Type=oneshot
 User=root
 ExecStart=/bin/podman run --rm --network host \
- -v /home/{{ user_to_execute }}/imagebuilder/tmp:/app/tmp:Z \
- -v /home/{{ user_to_execute }}/imagebuilder/checksums:/app/checksums:Z \
- -v /home/{{ user_to_execute }}/{{ imagebuilder_extra_dir }}/input.json:/app/input.json:Z \
- -v /home/{{ user_to_execute }}/{{ imagebuilder_extra_dir }}/log.log:/app/{{ item.imagebuilder_cloud }}.log:Z \
- -v /home/{{ user_to_execute }}/.config/clouds.yaml:/app/clouds.yaml:Z \
+ -v /home/{{ imagebuilder_user_to_execute }}/imagebuilder/tmp:/app/tmp:Z \
+ -v /home/{{ imagebuilder_user_to_execute }}/imagebuilder/checksums:/app/checksums:Z \
+ -v /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/input.json:/app/input.json:Z \
+ -v /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.log_file }}.log:/app/{{ item.imagebuilder_cloud }}.log:Z \
+ -v /home/{{ imagebuilder_user_to_execute }}/.config/clouds.yaml:/app/clouds.yaml:Z \
  -e IMAGEBUILDER_CLOUD={{ item.imagebuilder_cloud }} \
  -e IMAGEBUILDER_NETWORK={{ item.imagebuilder_network }} \
- imagebuilder
+ {{ imagebuilder_container_name }}

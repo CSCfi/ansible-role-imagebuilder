@@ -2,9 +2,10 @@
 # defaults file for imagebuilder-role
 install_method: container
 imagebuilder_repository_url: https://github.com/CSCfi/imagebuilder.git
+imagebuilder_repo_ref: main
 imagebuilder_directory: imagebuilder
-user_to_execute: imagebuilder
-container_name: imagebuilder
+imagebuilder_user_to_execute: imagebuilder
+imagebuilder_container_name: imagebuilder
 imagebuilder_extra_dir: imagebuilder-helpers
 
 
@@ -13,6 +14,7 @@ imagebuilder_clouds:
     imagebuilder_network: imagebuilder-network
     imagebuilder_cloud: mycloud
     timer_calendar: "*-*-* 12:00:00"
+    log_file: "log.log"
 
 
 imagebuilder_image_data:
