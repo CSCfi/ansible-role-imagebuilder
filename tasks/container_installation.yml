@@ -6,12 +6,13 @@
       - git
       - podman
 
-
 - name: Create imagebuilder user
   user:
     name: "{{ imagebuilder_user_to_execute }}"
     state: present
     create_home: yes
+    home: "/home/{{ imagebuilder_user_to_execute }}"
+    system: yes
 
 - name: Clone repository
   git:
@@ -21,46 +22,35 @@
 
   register: imagebuilder_git_result
 
-
-
-
 - name: Ensure .config exists for {{ imagebuilder_user_to_execute }}
   file:
       path: "/home/{{ imagebuilder_user_to_execute }}/.config"
       state: directory
-      mode: 0755
-
-
+      mode: '0755'
 
 - name: Copy vaulted clouds.yaml
   copy:
-    content: "{{ clouds_yaml | to_nice_yaml }}"
+    content: "{{ imagebuilder_clouds_yaml | to_nice_yaml }}"
     dest: "/home/{{ imagebuilder_user_to_execute }}/.config/clouds.yaml"
     mode: '0600'
-
-
 
 - name: Ensure {{ imagebuilder_extra_dir }} exists
   file:
       path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}
       state: directory
-
-
+      mode: '0644'
 
 - name: Copy input.json to remote
   copy:
     dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/input.json
     content: "{{ imagebuilder_image_data | to_nice_json }}"
 
-
-
 - name: ensure log file exists on remote
-  copy:
-    content: ""
-    dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.log_file }}.log
-    force: false
+  file:
+    state: touch
+    path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.log_file }}.log
+    mode: '0644'
   loop: "{{ imagebuilder_clouds }}"
-
 
 - name: Check if image exists
   containers.podman.podman_image_info:
@@ -69,13 +59,11 @@
   ignore_errors: true
   changed_when: false
 
-
 - name: Build imagebuilder container
   shell:
     cmd: podman build --network host -t {{ imagebuilder_container_name }} /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_directory }}
 
   when: imagebuilder_git_result.changed or (imagebuilder_pod_info.images is not defined) or (imagebuilder_pod_info.images | length == 0)
-
 
 - name: Deploy imagebuilder services
   template:
@@ -84,14 +72,12 @@
     mode: 0600
   loop: "{{ imagebuilder_clouds }}"
 
-
 - name: Deploy imagebuilder timers
   template:
     src: imagebuilder_run.timer.j2
     dest: /etc/systemd/system/imagebuilder-{{ item.name }}.timer
     mode: 0600
   loop: "{{ imagebuilder_clouds }}"
-
 
 - name: Enable imagebuilder timers
   systemd:
@@ -101,6 +87,5 @@
     daemon_reload: true
 
   loop: "{{ imagebuilder_clouds }}"
-    
 
 ...

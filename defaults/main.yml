@@ -1,12 +1,23 @@
 ---
 # defaults file for imagebuilder-role
-install_method: container
+imagebuilder_install_method: container
 imagebuilder_repository_url: https://github.com/CSCfi/imagebuilder.git
 imagebuilder_repo_ref: main
 imagebuilder_directory: imagebuilder
 imagebuilder_user_to_execute: imagebuilder
 imagebuilder_container_name: imagebuilder
 imagebuilder_extra_dir: imagebuilder-helpers
+
+imagebuilder_clouds_yaml:
+  clouds:
+    mycloud:
+      auth:
+        auth_url: "https://example.com:5001/v3"
+        username: "myname"
+        password: "mypassword"
+        project_name: "project_1234"
+        user_domain_id: ""
+        project_domain_id: ""
 
 
 imagebuilder_clouds:

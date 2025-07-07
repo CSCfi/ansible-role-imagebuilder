@@ -1,4 +1,7 @@
 # Imagebuilder ansible role
 Deploy imagebuilder with this ansible role
 
-Remember to provide a clouds.yaml inside of the variable clouds_yaml. Remember to keep it in a vault
+An example playbook is included with this role under playbooks/mycloud.yaml
+
+## Dependencies
+* containers.podman

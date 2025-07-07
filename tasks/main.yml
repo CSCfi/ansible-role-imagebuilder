@@ -2,7 +2,7 @@
 # tasks file for imagebuilder-role
 
 # Potentially allow other installation methods in the future
-- include_tasks: "{{ install_method }}_installation.yml"
+- include_tasks: "{{ imagebuilder_install_method }}_installation.yml"
 
 
 ...
