@@ -1,0 +1,14 @@
+---
+
+- name: Install and deploy imagebuilder on mycloud
+  hosts: mycloud
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Install and deploy imagebuilder
+      import_role:
+        name: ansible-role-imagebuilder
+
+
+...
