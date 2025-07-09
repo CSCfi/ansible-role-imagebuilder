@@ -19,13 +19,11 @@ imagebuilder_clouds_yaml:
         user_domain_id: ""
         project_domain_id: ""
 
-
-imagebuilder_clouds:
-  - name: mycloud
-    imagebuilder_network: imagebuilder-network
-    imagebuilder_cloud: mycloud
-    timer_calendar: "*-*-* 12:00:00"
-    log_file: "log.log"
+      service:
+        name: mycloud
+        imagebuilder_network: imagebuilder-network
+        timer_calendar: "*-*-* 12:00:00"
+        log_file: "log.log"
 
 
 imagebuilder_image_data:

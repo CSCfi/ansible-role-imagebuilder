@@ -1,9 +1,9 @@
 [Unit]
-Description=Timer that runs imagebuilder for {{ item.imagebuilder_cloud }}
+Description=Timer that runs imagebuilder for {{ item.key }}
 
 [Timer]
-OnCalendar={{ item.timer_calendar }}
-Unit=imagebuilder-{{ item.name }}.service
+OnCalendar={{ item.value.service.timer_calendar }}
+Unit=imagebuilder-{{ item.value.service.name }}.service
 
 [Install]
 WantedBy=timers.target
