@@ -48,9 +48,9 @@
 - name: ensure log file exists on remote
   file:
     state: touch
-    path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.log_file }}.log
+    path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.value.service.log_file }}
     mode: '0644'
-  loop: "{{ imagebuilder_clouds }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Check if image exists
   containers.podman.podman_image_info:
@@ -68,24 +68,24 @@
 - name: Deploy imagebuilder services
   template:
     src: imagebuilder_run.service.j2
-    dest: /etc/systemd/system/imagebuilder-{{ item.name }}.service
+    dest: /etc/systemd/system/imagebuilder-{{ item.value.service.name }}.service
     mode: 0600
-  loop: "{{ imagebuilder_clouds }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Deploy imagebuilder timers
   template:
     src: imagebuilder_run.timer.j2
-    dest: /etc/systemd/system/imagebuilder-{{ item.name }}.timer
+    dest: /etc/systemd/system/imagebuilder-{{ item.value.service.name }}.timer
     mode: 0600
-  loop: "{{ imagebuilder_clouds }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Enable imagebuilder timers
   systemd:
-    name: imagebuilder-{{ item.name }}.timer
+    name: imagebuilder-{{ item.value.service.name }}.timer
     enabled: true
     state: started
     daemon_reload: true
 
-  loop: "{{ imagebuilder_clouds }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 ...
