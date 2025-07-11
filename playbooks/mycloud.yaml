@@ -5,6 +5,10 @@
   gather_facts: yes
   become: yes
 
+  roles:
+     - { role: ansible-role-nrpe }
+     - { role: ansible-role-nrpe-plugins }
+
   tasks:
     - name: Install and deploy imagebuilder
       import_role:

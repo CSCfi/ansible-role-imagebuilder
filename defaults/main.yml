@@ -24,6 +24,7 @@ imagebuilder_clouds_yaml:
         imagebuilder_network: imagebuilder-network
         timer_calendar: "*-*-* 12:00:00"
         log_file: "log.log"
+        nagios_service_name: check_imagebuilder_mycloud
 
 
 imagebuilder_image_data:

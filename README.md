@@ -10,3 +10,6 @@ ansible-galaxy collection install -r requirements.yaml
 ```
 
 An example playbook is included with this role under playbooks/mycloud.yaml
+The example playbook is dependent on the following roles:
+https://github.com/CSCfi/ansible-role-nrpe-plugins
+https://github.com/CSCfi/ansible-role-nrpe

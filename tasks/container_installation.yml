@@ -5,6 +5,7 @@
     name:
       - git
       - podman
+      - python3
 
 - name: Create imagebuilder user
   user:
@@ -13,6 +14,21 @@
     create_home: yes
     home: "/home/{{ imagebuilder_user_to_execute }}"
     system: yes
+
+- name: Ensure Ansible remote_tmp exists
+  file:
+    path: /home/imagebuilder/.ansible/tmp
+    state: directory
+    owner: imagebuilder
+    group: imagebuilder
+    mode: "0755"
+
+- name: Allow imagebuilder group to read its home
+  file:
+    path: /home/{{ imagebuilder_user_to_execute }}
+    mode: "0750"
+    state: directory
+
 
 - name: Clone repository
   git:
@@ -38,7 +54,7 @@
   file:
       path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}
       state: directory
-      mode: '0644'
+      mode: '0755'
 
 - name: Copy input.json to remote
   copy:
@@ -49,7 +65,7 @@
   file:
     state: touch
     path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.value.service.log_file }}
-    mode: '0644'
+    mode: '644'
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Check if image exists
@@ -87,5 +103,16 @@
     daemon_reload: true
 
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+
+- name: Deploy imagebuilder check configurations
+  template:
+    src: imagebuilder_check_cfg.j2
+    dest: "{{ nagios_include_dir }}/imagebuilder-{{ item.value.service.name }}.cfg"
+    mode: 0600
+    owner: "{{ nrpe_user }}"
+    group: "{{ nrpe_group }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+
+
 
 ...
