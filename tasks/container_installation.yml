@@ -75,6 +75,17 @@
   ignore_errors: true
   changed_when: false
 
+- name: Test whether SELinux is enabled
+  command: /usr/sbin/selinuxenabled
+  ignore_errors: yes
+  register: selinux_status
+
+- name: Set SELinux rules if its enabled
+  shell:
+    cmd: ausearch -c 'python3' --raw | audit2allow -M my-python3; semodule -X 300 -i my-python3.pp
+  when: selinux_status.rc == 0
+
+
 - name: Build imagebuilder container
   shell:
     cmd: podman build --network host -t {{ imagebuilder_container_name }} /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_directory }}
@@ -103,6 +114,13 @@
     daemon_reload: true
 
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+
+
+- name: Add NRPE user to imagebuilder group
+  ansible.builtin.user:
+    name: "{{ nrpe_user }}"
+    groups: "{{ imagebuilder_user_to_execute }}"
+    append: yes
 
 - name: Deploy imagebuilder check configurations
   template:
