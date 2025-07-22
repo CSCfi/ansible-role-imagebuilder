@@ -29,7 +29,6 @@
     mode: "0750"
     state: directory
 
-
 - name: Clone repository
   git:
     repo: "{{ imagebuilder_repository_url }}"
@@ -56,15 +55,22 @@
       state: directory
       mode: '0755'
 
+- name: Ensure {{ imagebuilder_extra_dir }}/log exists
+  file:
+      path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log
+      state: directory
+      mode: '0755'
+
 - name: Copy input.json to remote
   copy:
-    dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/input.json
+    dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.value.service.input_file }}
     content: "{{ imagebuilder_image_data | to_nice_json }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: ensure log file exists on remote
   file:
     state: touch
-    path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.value.service.log_file }}
+    path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log/{{ item.value.service.log_file }}
     mode: '644'
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
@@ -84,7 +90,6 @@
   shell:
     cmd: ausearch -c 'python3' --raw | audit2allow -M my-python3; semodule -X 300 -i my-python3.pp
   when: selinux_status.rc == 0
-
 
 - name: Build imagebuilder container
   shell:
@@ -115,7 +120,6 @@
 
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
-
 - name: Add NRPE user to imagebuilder group
   ansible.builtin.user:
     name: "{{ nrpe_user }}"
@@ -131,6 +135,11 @@
     group: "{{ nrpe_group }}"
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
-
+- name: Add logrotate.d config for imagebuilder
+  become: true
+  tags: logrotate
+  template:
+    src: imagebuilder_logrotate.j2
+    dest: /etc/logrotate.d/imagebuilder-logrotate
 
 ...
