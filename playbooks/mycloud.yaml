@@ -2,8 +2,8 @@
 
 - name: Install and deploy imagebuilder on mycloud
   hosts: mycloud
-  gather_facts: yes
-  become: yes
+  gather_facts: true
+  become: true
 
   roles:
      - { role: ansible-role-nrpe }

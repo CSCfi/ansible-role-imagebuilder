@@ -1,0 +1,9 @@
+
+module nrpe-imagebuilder 1.0;
+
+require {
+	type container_file_t;
+	type nrpe_t;
+	class file { open read };
+}
+allow nrpe_t container_file_t:file { open read };

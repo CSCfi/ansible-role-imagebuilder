@@ -11,9 +11,9 @@
   user:
     name: "{{ imagebuilder_user_to_execute }}"
     state: present
-    create_home: yes
+    create_home: true
     home: "/home/{{ imagebuilder_user_to_execute }}"
-    system: yes
+    system: true
 
 - name: Ensure Ansible remote_tmp exists
   file:
@@ -83,12 +83,35 @@
 
 - name: Test whether SELinux is enabled
   command: /usr/sbin/selinuxenabled
-  ignore_errors: yes
+  ignore_errors: true
+  changed_when: false
   register: selinux_status
 
-- name: Set SELinux rules if its enabled
+- name: Copy nrpe-imagebuilder.te to remote
+  copy:
+    dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/nrpe-imagebuilder.te
+    src: files/nrpe-imagebuilder.te
+  when: selinux_status.rc == 0
+
+- name: Check nrpe-imagebuilder module
   shell:
-    cmd: ausearch -c 'python3' --raw | audit2allow -M my-python3; semodule -X 300 -i my-python3.pp
+    cmd: checkmodule -M -m -o nrpe-imagebuilder.mod nrpe-imagebuilder.te
+  args:
+    chdir: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/
+  when: selinux_status.rc == 0
+
+- name: Create SELinux package for nrpe-imagebuilder
+  shell:
+    cmd: semodule_package -o nrpe-imagebuilder.pp -m nrpe-imagebuilder.mod
+  args:
+    chdir: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/
+  when: selinux_status.rc == 0
+
+- name: Enable SELinux package for nrpe-imagebuilder
+  shell:
+    cmd: semodule -X 300 -i nrpe-imagebuilder.pp
+  args:
+    chdir: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/
   when: selinux_status.rc == 0
 
 - name: Build imagebuilder container
@@ -121,10 +144,10 @@
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Add NRPE user to imagebuilder group
-  ansible.builtin.user:
+  user:
     name: "{{ nrpe_user }}"
     groups: "{{ imagebuilder_user_to_execute }}"
-    append: yes
+    append: true
 
 - name: Deploy imagebuilder check configurations
   template:
