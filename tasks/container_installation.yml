@@ -60,6 +60,8 @@
       path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log
       state: directory
       mode: '0750'
+      owner: "{{ imagebuilder_user_to_execute }}"
+      group: "{{ imagebuilder_user_to_execute }}"
 
 - name: Copy input.json to remote
   copy:
@@ -72,6 +74,8 @@
     state: touch
     path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log/{{ item.value.service.log_file }}
     mode: '0640'
+    owner: "{{ imagebuilder_user_to_execute }}"
+    group: "{{ imagebuilder_user_to_execute }}"    
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Check if image exists
