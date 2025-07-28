@@ -8,6 +8,9 @@ imagebuilder_user_to_execute: imagebuilder
 imagebuilder_container_name: imagebuilder
 imagebuilder_extra_dir: imagebuilder-helpers
 
+nagios_include_dir: "/etc/nrpe.d"
+imagebuilder_manage_nrpe: true
+
 imagebuilder_clouds_yaml:
   clouds:
     mycloud:

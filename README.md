@@ -13,3 +13,5 @@ An example playbook is included with this role under playbooks/mycloud.yaml
 The example playbook is dependent on the following roles:
 https://github.com/CSCfi/ansible-role-nrpe-plugins
 https://github.com/CSCfi/ansible-role-nrpe
+
+If you wish to not use NRPE then set the variable imagebuilder_manage_nrpe to false
