@@ -10,6 +10,8 @@ imagebuilder_extra_dir: imagebuilder-helpers
 
 nagios_include_dir: "/etc/nrpe.d"
 imagebuilder_manage_nrpe: true
+nrpe_user: "nrpe"
+nrpe_group: "nrpe"
 
 imagebuilder_clouds_yaml:
   clouds:
