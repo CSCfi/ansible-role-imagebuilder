@@ -5,6 +5,7 @@ After=syslog.target network.target auditd.service
 [Service]
 Type=oneshot
 User=root
+Environment={{ item.value.service.environment }}
 ExecStart=/bin/podman run --rm --network host \
  -v /home/{{ imagebuilder_user_to_execute }}/imagebuilder/tmp:/app/tmp:Z \
  -v /home/{{ imagebuilder_user_to_execute }}/imagebuilder/checksums:/app/checksums:Z \
