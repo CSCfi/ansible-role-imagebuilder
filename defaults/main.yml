@@ -8,6 +8,11 @@ imagebuilder_user_to_execute: imagebuilder
 imagebuilder_container_name: imagebuilder
 imagebuilder_extra_dir: imagebuilder-helpers
 
+nagios_include_dir: "/etc/nrpe.d"
+imagebuilder_manage_nrpe: true
+nrpe_user: "nrpe"
+nrpe_group: "nrpe"
+
 imagebuilder_clouds_yaml:
   clouds:
     mycloud:
@@ -19,13 +24,14 @@ imagebuilder_clouds_yaml:
         user_domain_id: ""
         project_domain_id: ""
 
-
-imagebuilder_clouds:
-  - name: mycloud
-    imagebuilder_network: imagebuilder-network
-    imagebuilder_cloud: mycloud
-    timer_calendar: "*-*-* 12:00:00"
-    log_file: "log.log"
+      service:
+        name: mycloud
+        imagebuilder_network: imagebuilder-network
+        timer_calendar: "*-*-* 12:00:00"
+        log_file: "log.json"
+        nagios_service_name: check_imagebuilder_mycloud
+        input_file: "input.json"
+        environment: {}
 
 
 imagebuilder_image_data:
@@ -34,14 +40,18 @@ imagebuilder_image_data:
       image_name: Ubuntu-24.04
       image_url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
       properties:
-        os_distro: ubuntu
+        os_distro: ubuntu24.04
+        os_version: 24.04
+        os_admin_user: ubuntu
       visibility: public
       
     - checksum_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/CHECKSUM
       image_name: AlmaLinux-9
       image_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
       properties:
-        os_distro: almalinux
+        os_distro: almalinux9
+        os_version: 9
+        os_admin_user: almalinux
       visibility: public
   
   deprecated:

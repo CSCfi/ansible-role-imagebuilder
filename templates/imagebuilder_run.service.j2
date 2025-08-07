@@ -1,16 +1,17 @@
 [Unit]
-Description=Start imagebuilder for {{ item.imagebuilder_cloud }}
+Description=Start imagebuilder for {{ item.key }}
 After=syslog.target network.target auditd.service
 
 [Service]
 Type=oneshot
 User=root
+Environment={{ item.value.service.environment }}
 ExecStart=/bin/podman run --rm --network host \
  -v /home/{{ imagebuilder_user_to_execute }}/imagebuilder/tmp:/app/tmp:Z \
  -v /home/{{ imagebuilder_user_to_execute }}/imagebuilder/checksums:/app/checksums:Z \
- -v /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/input.json:/app/input.json:Z \
- -v /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.log_file }}.log:/app/{{ item.imagebuilder_cloud }}.log:Z \
+ -v /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.value.service.input_file }}:/app/input.json:Z \
+ -v /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log/{{ item.value.service.log_file }}:/app/{{ item.key }}_log.json:Z \
  -v /home/{{ imagebuilder_user_to_execute }}/.config/clouds.yaml:/app/clouds.yaml:Z \
- -e IMAGEBUILDER_CLOUD={{ item.imagebuilder_cloud }} \
- -e IMAGEBUILDER_NETWORK={{ item.imagebuilder_network }} \
+ -e IMAGEBUILDER_CLOUD={{ item.key }} \
+ -e IMAGEBUILDER_NETWORK={{ item.value.service.imagebuilder_network }} \
  {{ imagebuilder_container_name }}

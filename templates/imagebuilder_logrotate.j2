@@ -1,0 +1,7 @@
+/home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log/*.json {
+    rotate 5
+    compress
+    missingok
+    monthly
+    create 0640 {{ imagebuilder_user_to_execute }} {{ imagebuilder_user_to_execute }}
+}

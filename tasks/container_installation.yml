@@ -5,14 +5,29 @@
     name:
       - git
       - podman
+      - python3
 
 - name: Create imagebuilder user
   user:
     name: "{{ imagebuilder_user_to_execute }}"
     state: present
-    create_home: yes
+    create_home: true
     home: "/home/{{ imagebuilder_user_to_execute }}"
-    system: yes
+    system: true
+
+- name: Ensure Ansible remote_tmp exists
+  file:
+    path: /home/imagebuilder/.ansible/tmp
+    state: directory
+    owner: imagebuilder
+    group: imagebuilder
+    mode: "0755"
+
+- name: Allow imagebuilder group to read its home
+  file:
+    path: /home/{{ imagebuilder_user_to_execute }}
+    mode: "0750"
+    state: directory
 
 - name: Clone repository
   git:
@@ -38,19 +53,30 @@
   file:
       path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}
       state: directory
-      mode: '0644'
+      mode: '0750'
+
+- name: Ensure {{ imagebuilder_extra_dir }}/log exists
+  file:
+      path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log
+      state: directory
+      mode: '0750'
+      owner: "{{ imagebuilder_user_to_execute }}"
+      group: "{{ imagebuilder_user_to_execute }}"
 
 - name: Copy input.json to remote
   copy:
-    dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/input.json
+    dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.value.service.input_file }}
     content: "{{ imagebuilder_image_data | to_nice_json }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: ensure log file exists on remote
   file:
     state: touch
-    path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/{{ item.log_file }}.log
-    mode: '0644'
-  loop: "{{ imagebuilder_clouds }}"
+    path: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log/{{ item.value.service.log_file }}
+    mode: '0640'
+    owner: "{{ imagebuilder_user_to_execute }}"
+    group: "{{ imagebuilder_user_to_execute }}"    
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Check if image exists
   containers.podman.podman_image_info:
@@ -58,6 +84,39 @@
   register: imagebuilder_pod_info
   ignore_errors: true
   changed_when: false
+
+- name: Test whether SELinux is enabled
+  command: /usr/sbin/selinuxenabled
+  ignore_errors: true
+  changed_when: false
+  register: selinux_status
+
+- name: Copy nrpe-imagebuilder.te to remote
+  copy:
+    dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/nrpe-imagebuilder.te
+    src: files/nrpe-imagebuilder.te
+  when: selinux_status.rc == 0 and imagebuilder_manage_nrpe
+
+- name: Check nrpe-imagebuilder module
+  shell:
+    cmd: checkmodule -M -m -o nrpe-imagebuilder.mod nrpe-imagebuilder.te
+  args:
+    chdir: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/
+  when: selinux_status.rc == 0 and imagebuilder_manage_nrpe
+
+- name: Create SELinux package for nrpe-imagebuilder
+  shell:
+    cmd: semodule_package -o nrpe-imagebuilder.pp -m nrpe-imagebuilder.mod
+  args:
+    chdir: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/
+  when: selinux_status.rc == 0 and imagebuilder_manage_nrpe
+
+- name: Enable SELinux package for nrpe-imagebuilder
+  shell:
+    cmd: semodule -X 300 -i nrpe-imagebuilder.pp
+  args:
+    chdir: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/
+  when: selinux_status.rc == 0 and imagebuilder_manage_nrpe
 
 - name: Build imagebuilder container
   shell:
@@ -68,24 +127,48 @@
 - name: Deploy imagebuilder services
   template:
     src: imagebuilder_run.service.j2
-    dest: /etc/systemd/system/imagebuilder-{{ item.name }}.service
+    dest: /etc/systemd/system/imagebuilder-{{ item.value.service.name }}.service
     mode: 0600
-  loop: "{{ imagebuilder_clouds }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Deploy imagebuilder timers
   template:
     src: imagebuilder_run.timer.j2
-    dest: /etc/systemd/system/imagebuilder-{{ item.name }}.timer
+    dest: /etc/systemd/system/imagebuilder-{{ item.value.service.name }}.timer
     mode: 0600
-  loop: "{{ imagebuilder_clouds }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 - name: Enable imagebuilder timers
   systemd:
-    name: imagebuilder-{{ item.name }}.timer
+    name: imagebuilder-{{ item.value.service.name }}.timer
     enabled: true
     state: started
     daemon_reload: true
 
-  loop: "{{ imagebuilder_clouds }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+
+- name: Add NRPE user to imagebuilder group
+  user:
+    name: "{{ nrpe_user }}"
+    groups: "{{ imagebuilder_user_to_execute }}"
+    append: true
+  when: imagebuilder_manage_nrpe
+
+- name: Deploy imagebuilder check configurations
+  template:
+    src: imagebuilder_check_cfg.j2
+    dest: "{{ nagios_include_dir }}/imagebuilder-{{ item.value.service.name }}.cfg"
+    mode: 0600
+    owner: "{{ nrpe_user }}"
+    group: "{{ nrpe_group }}"
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+  when: imagebuilder_manage_nrpe
+
+- name: Add logrotate.d config for imagebuilder
+  become: true
+  tags: logrotate
+  template:
+    src: imagebuilder_logrotate.j2
+    dest: /etc/logrotate.d/imagebuilder-logrotate
 
 ...
