@@ -23,7 +23,6 @@ imagebuilder_clouds_yaml:
         project_name: "project_1234"
         user_domain_id: ""
         project_domain_id: ""
-        environment: {}
 
       service:
         name: mycloud
@@ -43,6 +42,7 @@ imagebuilder_image_data:
       properties:
         os_distro: ubuntu24.04
         os_version: 24.04
+        os_admin_user: ubuntu
       visibility: public
       
     - checksum_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/CHECKSUM
@@ -51,6 +51,7 @@ imagebuilder_image_data:
       properties:
         os_distro: almalinux9
         os_version: 9
+        os_admin_user: almalinux
       visibility: public
   
   deprecated:
