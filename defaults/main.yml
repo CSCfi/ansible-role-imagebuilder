@@ -7,6 +7,9 @@ imagebuilder_directory: imagebuilder
 imagebuilder_user_to_execute: imagebuilder
 imagebuilder_container_name: imagebuilder
 imagebuilder_extra_dir: imagebuilder-helpers
+imagebuilder_systemd_units_masked: false
+imagebuilder_systemd_units_enabled: true
+imagebuilder_systemd_units_state: started
 
 nagios_include_dir: "/etc/nrpe.d"
 imagebuilder_manage_nrpe: true
@@ -44,7 +47,7 @@ imagebuilder_image_data:
         os_version: 24.04
         os_admin_user: ubuntu
       visibility: public
-      
+
     - checksum_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/CHECKSUM
       image_name: AlmaLinux-9
       image_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
@@ -53,7 +56,7 @@ imagebuilder_image_data:
         os_version: 9
         os_admin_user: almalinux
       visibility: public
-  
+
   deprecated:
     - filename: noble-server-cloudimg-amd64.img
       image_name: Ubuntu-18.04
