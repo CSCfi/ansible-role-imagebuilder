@@ -148,15 +148,6 @@
     daemon_reload: true
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
-- name: Configure imagebuilder services
-  systemd:
-    name: imagebuilder-{{ item.value.service.name }}.service
-    masked: "{{ imagebuilder_systemd_units_masked }}"
-    enabled: "{{ imagebuilder_systemd_units_enabled }}"
-    state: "{{ imagebuilder_systemd_units_state }}"
-    daemon_reload: true
-  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
-
 - name: Add NRPE user to imagebuilder group
   user:
     name: "{{ nrpe_user }}"
@@ -180,5 +171,14 @@
   template:
     src: imagebuilder_logrotate.j2
     dest: /etc/logrotate.d/imagebuilder-logrotate
+
+- name: Configure imagebuilder services
+  systemd:
+    name: imagebuilder-{{ item.value.service.name }}.service
+    masked: "{{ imagebuilder_systemd_units_masked }}"
+    enabled: "{{ imagebuilder_systemd_units_enabled }}"
+    state: "{{ imagebuilder_systemd_units_state }}"
+    daemon_reload: true
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
 ...
