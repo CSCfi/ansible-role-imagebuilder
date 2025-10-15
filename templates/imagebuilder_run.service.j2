@@ -13,5 +13,10 @@ ExecStart=/bin/podman run --rm --network host \
  -v /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/log/{{ item.value.service.log_file }}:/app/{{ item.key }}_log.json:Z \
  -v /home/{{ imagebuilder_user_to_execute }}/.config/clouds.yaml:/app/clouds.yaml:Z \
  -e IMAGEBUILDER_CLOUD={{ item.key }} \
+ -e IMAGEBUILDER_DISABLE_PINGING=${IMAGEBUILDER_DISABLE_PINGING} \
+ -e IMAGEBUILDER_LOG_FILE=${IMAGEBUILDER_LOG_FILE} \
+ -e IMAGEBUILDER_OUTPUT_FORMAT=${IMAGEBUILDER_OUTPUT_FORMAT} \
+ -e IMAGEBUILDER_DEBUG_LEVEL=${IMAGEBUILDER_DEBUG_LEVEL} \
+ -e IMAGEBUILDER_OPENSTACK_DEBUG_LEVEL=${IMAGEBUILDER_OPENSTACK_DEBUG_LEVEL} \
  -e IMAGEBUILDER_NETWORK={{ item.value.service.imagebuilder_network }} \
  {{ imagebuilder_container_name }}
