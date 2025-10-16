@@ -177,7 +177,6 @@
     name: imagebuilder-{{ item.value.service.name }}.service
     masked: "{{ imagebuilder_systemd_units_masked }}"
     enabled: "{{ imagebuilder_systemd_units_enabled }}"
-    state: "{{ imagebuilder_systemd_units_state }}"
     daemon_reload: true
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
 
