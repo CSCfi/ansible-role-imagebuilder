@@ -15,4 +15,4 @@ ExecStart=/bin/podman run --rm --network host \
  -e IMAGEBUILDER_CLOUD={{ item.key }} \
  -e IMAGEBUILDER_DISABLE_PINGING=${IMAGEBUILDER_DISABLE_PINGING} \
  -e IMAGEBUILDER_NETWORK={{ item.value.service.imagebuilder_network }} \
- {{ imagebuilder_container_name }}/{{ imagebuilder_repo_ref }}
+ {{ imagebuilder_container_name }}/{{ imagebuilder_repo_ref | lower }}
