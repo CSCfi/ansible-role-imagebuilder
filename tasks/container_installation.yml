@@ -121,7 +121,7 @@
 
 - name: Build imagebuilder container
   shell:
-    cmd: podman build --network host -t {{ imagebuilder_container_name }} /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_directory }}
+    cmd: podman build --network host -t {{ imagebuilder_container_name }}/{{ imagebuilder_repo_ref }} /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_directory }}
 
   when: imagebuilder_git_result.changed or (imagebuilder_pod_info.images is not defined) or (imagebuilder_pod_info.images | length == 0)
 
