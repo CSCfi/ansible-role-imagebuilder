@@ -92,6 +92,22 @@
   changed_when: false
   register: selinux_status
 
+- name: Ensure NRPE can read and access imagebuilder home folder
+  ansible.posix.acl:
+    path: /home/imagebuilder
+    entity: nrpe
+    etype: user
+    permissions: rx
+    state: present
+
+- name: Ensure NRPE can read and access imagebuilder-helpers folder
+  ansible.posix.acl:
+    path: /home/imagebuilder/imagebuilder-helpers
+    entity: nrpe
+    etype: user
+    permissions: rx
+    state: present
+
 - name: Copy nrpe-imagebuilder.te to remote
   copy:
     dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/nrpe-imagebuilder.te
