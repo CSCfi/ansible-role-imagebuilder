@@ -92,6 +92,22 @@
   changed_when: false
   register: selinux_status
 
+- name: Ensure NRPE can read and access imagebuilder home folder
+  ansible.posix.acl:
+    path: /home/imagebuilder
+    entity: nrpe
+    etype: user
+    permissions: rx
+    state: present
+
+- name: Ensure NRPE can read and access imagebuilder-helpers folder
+  ansible.posix.acl:
+    path: /home/imagebuilder/imagebuilder-helpers
+    entity: nrpe
+    etype: user
+    permissions: rx
+    state: present
+
 - name: Copy nrpe-imagebuilder.te to remote
   copy:
     dest: /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_extra_dir }}/nrpe-imagebuilder.te
@@ -121,7 +137,7 @@
 
 - name: Build imagebuilder container
   shell:
-    cmd: podman build --network host -t {{ imagebuilder_container_name }} /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_directory }}
+    cmd: podman build --network host -t {{ imagebuilder_container_name }}/{{ imagebuilder_repo_ref | lower }} /home/{{ imagebuilder_user_to_execute }}/{{ imagebuilder_directory }}
 
   when: imagebuilder_git_result.changed or (imagebuilder_pod_info.images is not defined) or (imagebuilder_pod_info.images | length == 0)
 

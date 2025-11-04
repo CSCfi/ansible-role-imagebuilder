@@ -47,6 +47,7 @@ imagebuilder_image_data:
         os_version: 24.04
         os_admin_user: ubuntu
       visibility: public
+      timeout: 600
 
     - checksum_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/CHECKSUM
       image_name: AlmaLinux-9
