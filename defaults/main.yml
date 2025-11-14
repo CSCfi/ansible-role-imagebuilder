@@ -10,6 +10,7 @@ imagebuilder_extra_dir: imagebuilder-helpers
 imagebuilder_systemd_units_masked: false
 imagebuilder_systemd_units_enabled: true
 imagebuilder_systemd_units_state: started
+imagebuilder_systemd_timers_enabled: true
 
 nagios_include_dir: "/etc/nrpe.d"
 imagebuilder_manage_nrpe: true
