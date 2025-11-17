@@ -196,6 +196,6 @@
     state: "{{ imagebuilder_systemd_timer_state }}"
     daemon_reload: true
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
-  when: imagebuilder_systemd_timers_enabled
+  when: imagebuilder_systemd_timers_configured
 
 ...
