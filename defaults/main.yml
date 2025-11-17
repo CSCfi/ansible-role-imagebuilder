@@ -7,10 +7,11 @@ imagebuilder_directory: imagebuilder
 imagebuilder_user_to_execute: imagebuilder
 imagebuilder_container_name: imagebuilder
 imagebuilder_extra_dir: imagebuilder-helpers
-imagebuilder_systemd_units_masked: false
-imagebuilder_systemd_units_enabled: true
-imagebuilder_systemd_units_state: started
-imagebuilder_systemd_timers_enabled: true
+imagebuilder_systemd_timer_state: started
+imagebuilder_systemd_timer_enabled: true
+imagebuilder_systemd_timer_masked: false
+imagebuilder_systemd_service_enabled: true
+imagebuilder_systemd_service_masked: false
 
 nagios_include_dir: "/etc/nrpe.d"
 imagebuilder_manage_nrpe: true
