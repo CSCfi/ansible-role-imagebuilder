@@ -154,6 +154,7 @@
     dest: /etc/systemd/system/imagebuilder-{{ item.value.service.name }}.timer
     mode: 0600
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+  when: imagebuilder_systemd_timers_enabled
 
 - name: Configure imagebuilder timers
   systemd:
@@ -163,6 +164,7 @@
     state: "{{ imagebuilder_systemd_units_state }}"
     daemon_reload: true
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+  when: imagebuilder_systemd_timers_enabled
 
 - name: Add NRPE user to imagebuilder group
   user:
