@@ -156,16 +156,6 @@
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
   when: imagebuilder_systemd_timers_enabled
 
-- name: Configure imagebuilder timers
-  systemd:
-    name: imagebuilder-{{ item.value.service.name }}.timer
-    masked: "{{ imagebuilder_systemd_units_masked }}"
-    enabled: "{{ imagebuilder_systemd_units_enabled }}"
-    state: "{{ imagebuilder_systemd_units_state }}"
-    daemon_reload: true
-  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
-  when: imagebuilder_systemd_timers_enabled
-
 - name: Add NRPE user to imagebuilder group
   user:
     name: "{{ nrpe_user }}"
@@ -197,5 +187,15 @@
     enabled: "{{ imagebuilder_systemd_units_enabled }}"
     daemon_reload: true
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+
+- name: Configure imagebuilder timers
+  systemd:
+    name: imagebuilder-{{ item.value.service.name }}.timer
+    masked: "{{ imagebuilder_systemd_units_masked }}"
+    enabled: "{{ imagebuilder_systemd_units_enabled }}"
+    state: "{{ imagebuilder_systemd_units_state }}"
+    daemon_reload: true
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+  when: imagebuilder_systemd_timers_enabled
 
 ...
