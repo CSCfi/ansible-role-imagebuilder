@@ -154,17 +154,7 @@
     dest: /etc/systemd/system/imagebuilder-{{ item.value.service.name }}.timer
     mode: 0600
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
-  when: imagebuilder_systemd_timers_enabled
-
-- name: Configure imagebuilder timers
-  systemd:
-    name: imagebuilder-{{ item.value.service.name }}.timer
-    masked: "{{ imagebuilder_systemd_units_masked }}"
-    enabled: "{{ imagebuilder_systemd_units_enabled }}"
-    state: "{{ imagebuilder_systemd_units_state }}"
-    daemon_reload: true
-  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
-  when: imagebuilder_systemd_timers_enabled
+  when: imagebuilder_systemd_timers_configured
 
 - name: Add NRPE user to imagebuilder group
   user:
@@ -193,9 +183,19 @@
 - name: Configure imagebuilder services
   systemd:
     name: imagebuilder-{{ item.value.service.name }}.service
-    masked: "{{ imagebuilder_systemd_units_masked }}"
-    enabled: "{{ imagebuilder_systemd_units_enabled }}"
+    enabled: "{{ imagebuilder_systemd_service_enabled }}"
+    masked: "{{ imagebuilder_systemd_service_masked }}"
     daemon_reload: true
   loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+
+- name: Configure imagebuilder timers
+  systemd:
+    name: imagebuilder-{{ item.value.service.name }}.timer
+    enabled: "{{ imagebuilder_systemd_timer_enabled }}"
+    state: "{{ imagebuilder_systemd_timer_state }}"
+    masked: "{{ imagebuilder_systemd_timer_masked }}"
+    daemon_reload: true
+  loop: "{{ imagebuilder_clouds_yaml.clouds | dict2items }}"
+  when: imagebuilder_systemd_timers_configured
 
 ...
